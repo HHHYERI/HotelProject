@@ -1,6 +1,9 @@
-노션 링크: https://broadleaf-periwinkle-hyeri.notion.site/Spring-mvc-Pj-Hotel-Site-6a4e28f680a646b7a36ae6bbf1e06cef
+노션 링크
+https://broadleaf-periwinkle-hyeri.notion.site/Spring-mvc-Pj-Hotel-Site-10cebb5325fe806b8934df04373c72cb?pvs=4
 
 日本語はこちら
+https://broadleaf-periwinkle-hyeri.notion.site/JP-Spring-mvc-Pj-Hotel-Site-6a4e28f680a646b7a36ae6bbf1e06cef?pvs=4
+
 
 
 ## 📖 상세 내용
