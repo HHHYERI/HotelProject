@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.springmvc.mapper.ResvMapper">
+<select id="getRoomlist" parameterType="hashMap" resultType="hashMap">
+<![CDATA[
+	with stay_dt as(
+	    select to_char(to_date(#{rsv_in_dt}) + level-1, 'YYYYMMDD') rsv_dt
+	      from dual
+	    connect by level <= (to_date(#{rsv_out_dt})-to_date(#{rsv_in_dt}))    
+	)
+	select q.room_gr
+	      ,q.room_tp 
+	      ,q.smok_yn
+	      ,r.room_size
+	      ,r.room_cap
+	      ,r.bsic_prc
+	      ,w.cd_nm||' '||e.cd_nm ||' '|| replace(replace(q.smok_yn, 'N', 'Non-smoking'), 'Y', 'Smoking') as room_nm
+	      ,min(remain_cnt) real_remain_cnt
+	      ,i.img_path
+	from 
+	    ( select x.room_gr, x.room_tp, x.smok_yn, x.rsv_dt, (total_cnt - nvl(rsv_cnt,0) ) remain_cnt
+	       from(select a.rsv_dt, b.room_gr, b.room_tp, b.smok_yn, count(1) total_cnt
+	              from stay_dt a, room_info b
+	             where 1=1
+	             group by a.rsv_dt, b.room_gr, b.room_tp, b.smok_yn) X
+	            ,(select c.rsv_dt, d.room_gr, d.room_tp, d.smok_yn, count(1) rsv_cnt
+	               from stay_dt c, rsv_cus_info d
+	              where 1=1 and d.rsv_st = '00' and rsv_in_dt <= c.rsv_dt and rsv_out_dt > c.rsv_dt
+	              group by c.rsv_dt, d.room_gr, d.room_tp, d.smok_yn) Y 
+	       where X.rsv_dt = Y.rsv_dt(+)
+	         and X.room_gr = Y.room_gr(+)
+	         and X.room_tp = Y.room_tp(+)
+	         and X.smok_yn = Y.smok_yn(+) ) Q   
+	    ,( select cd_nm, class_s_cd
+	       from lan_code where class_l_cd='A0000' and country_cd='EN' ) W
+	    ,( select cd_nm, class_s_cd
+	       from lan_code where class_l_cd='A0001' and country_cd='EN' ) E   
+	    , room_info R
+	    ,( select x.room_gr, x.room_tp, y.img_path
+	       from ( select distinct room_gr, room_tp from room_info ) x, img y
+	       where x.room_gr || '^' || x.room_tp = y.tb_keys(+) group by x.room_gr, x.room_tp, y.img_path ) I
+	where q.room_gr = w.class_s_cd(+)
+	  and q.room_tp = e.class_s_cd(+)
+	  and q.room_gr = r.room_gr(+)
+	  and q.room_tp = r.room_tp(+)
+	  and q.room_gr = i.room_gr(+)
+	  and q.room_tp = i.room_tp(+)
+	  and r.room_cap >= #{person_num} 
+	group by w.cd_nm||' '||e.cd_nm ||' '|| replace(replace(q.smok_yn, 'N', 'Non-smoking'), 'Y', 'Smoking')
+	        ,q.room_gr ,q.room_tp ,q.smok_yn ,r.room_size ,r.room_cap ,r.bsic_prc, i.img_path
+	having min(remain_cnt) >= #{room_cnt}
+	   
+	order by decode(room_gr, 'STD', 1, 'DLX', 2, 'LUX', 3, 'SUT', 4, 9), decode(room_tp, 'SGL', 1, 'DBL', 2, 'TWN', 3, 'TRP', 4, 'FML', 5, 9), smok_yn
+]]>
+</select>
+<insert id="insertResvForm" parameterType="com.springmvc.domain.ResvVO">
+<![CDATA[
+INSERT INTO rsv_cus_info
+	(rsv_cd
+	,rsv_cus_nm
+	,rsv_phon_num
+	,rsv_mail_addr 
+	,cus_memo 
+	,meal_yn 
+	,sty_cus_nm 
+	,sty_phon_num 
+	,rsv_in_tm
+	,rsv_in_dt
+	,rsv_out_dt
+	,room_gr
+	,room_tp
+	,smok_yn
+	,room_seq
+	,adlt_num
+	,chld_num
+	,rsv_prc
+	 ) 
+VALUES
+ 	(#{rsv_cd}
+ 	,#{rsv_cus_nm}
+ 	,#{rsv_phon_num}
+	,#{rsv_mail_addr} 
+	,#{cus_memo}
+	,#{meal_yn}
+	,#{sty_cus_nm} 
+	,#{sty_phon_num}
+	,#{rsv_in_tm}
+	,#{rsv_in_dt}
+	,#{rsv_out_dt}
+	,#{room_gr}
+	,#{room_tp}
+	,#{smok_yn}
+	,#{room_seq}
+	,#{adlt_num}
+	,#{chld_num}
+	,#{rsv_prc}
+	)
+]]>	
+</insert>
+
+<select id="countByResvNum" resultType="int">
+    SELECT COUNT(*) 
+      FROM rsv_cus_info
+     WHERE rsv_cd = #{rsv_cd}
+</select>
+
+<select id="getReservation" resultType="int">
+SELECT count(1) as cnt_resv_info
+  FROM rsv_cus_info
+ WHERE rsv_mail_addr = #{rsv_mail_addr}
+   AND rsv_cd = #{rsv_cd}
+</select>
+
+<select id="getResvInfo" resultType="com.springmvc.domain.ResvVO">
+SELECT rsv_cd
+      ,room_seq
+	  ,rsv_cus_nm
+      ,rsv_phon_num 
+      ,rsv_mail_addr 
+      ,adlt_num
+      ,chld_num
+      ,rsv_prc
+      ,cus_memo 
+      ,meal_yn 
+      ,room_gr
+      ,room_tp  
+      ,smok_yn    
+      ,sty_cus_nm 
+      ,sty_phon_num 
+      ,rsv_in_tm
+      ,to_char(rsv_reg_dtm, 'YYYY/MM/DD') as rsv_reg_dtm
+      ,rsv_in_dt
+      ,rsv_out_dt
+      ,rsv_st
+      ,w.cd_nm||' '||e.cd_nm ||' '|| replace(replace(smok_yn, 'N', 'Non-smoking'), 'Y', 'Smoking') as room_nm
+  FROM rsv_cus_info
+       ,( select cd_nm, class_s_cd
+	       from lan_code where class_l_cd='A0000' and country_cd='EN' ) W
+	   ,( select cd_nm, class_s_cd
+	       from lan_code where class_l_cd='A0001' and country_cd='EN' ) E   
+ WHERE rsv_mail_addr = #{rsv_mail_addr}
+   AND rsv_cd = #{rsv_cd}
+   AND room_gr = w.class_s_cd(+)
+   AND room_tp = e.class_s_cd(+)   
+</select>
+
+<update id="updateRsvSt">
+UPDATE rsv_cus_info
+   SET rsv_st = '04'
+ WHERE rsv_cd = #{rsv_cd}
+</update>
+
+<update id="updateMemo">
+UPDATE rsv_cus_info
+   SET cus_memo = #{cus_memo}
+ WHERE rsv_cd = #{rsv_cd}
+</update>
+
+</mapper>

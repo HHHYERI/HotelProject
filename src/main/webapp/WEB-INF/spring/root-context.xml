@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.3.xsd
+		http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.3.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd">
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+
+<!-- 오라클 DB와 연결 -->
+<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" lazy-init="false">
+    <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+    <property name="url" value="jdbc:oracle:thin:@localhost:1521:xe" />
+    <property name="username" value="hotel_db" />
+    <property name="password" value="root"/>
+</bean>  
+
+<!-- 오라클 DB에 관한 설정 파일. sqlSessionFactory 객체 주입 -->
+<bean class="org.mybatis.spring.SqlSessionFactoryBean" id="SqlSessionFactory">
+	<!-- DB에 접속 하기 위해서 설정 -->	
+  	<property name="dataSource" ref="dataSource" />
+  	<!-- myBatis 기본 설정 -->
+  	<property value="classpath:mybatis-config.xml" name="configLocation" />
+  	<!-- query 적힌 xml 위치 -->
+  	<property value="classpath:/mapper/*Mapper.xml" name="mapperLocations" />
+  	<!-- 트랜잭션 관리를 위한 것 -->
+  	<property name="transactionFactory">
+  	<bean class="org.mybatis.spring.transaction.SpringManagedTransactionFactory" />
+  </property>
+</bean>
+
+<!-- DAO(interface) 위치를 basePackage로.. -->
+<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+      <property name="basePackage" value="com.springmvc.domain" />
+</bean>
+
+<!-- 트랜잭션 관리를 위한 bean  -->
+<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+      <property name="dataSource" ref="dataSource" />
+</bean>
+
+<mybatis-spring:scan base-package="com.springmvc.mapper" />
+
+<!-- 메일 서버 관련 정보 설정 -->
+<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl"> 
+   	<property name="host" value="smtp.gmail.com" />
+   	<!-- google SMTP 메일 서버 포트 -->
+   	<property name="port" value="587" /> 
+   	<!-- 자신의 메일, 비밀번호 설정 -->
+	<property name="username" value="hyeri7773@gmail.com"/> 
+	<!-- Google의 경우 계정 비밀번호가 아니라 2단계 인증을 거친 후 얻게 되는 16자리 비밀번호로 설정해야 한다-->
+	<property name="password" value="newyujiurficzzrb"/> 
+	<!-- 메일 전달 프로토콜 세부 속성 설정 -->
+     <property name="javaMailProperties">
+	    <props>
+	       <prop key="mail.smtp.starttls.enable">true</prop>
+	       <prop key="mail.smtp.auth">true</prop>
+	       <prop key="mail.transport.protocol">smtp</prop>
+	       <prop key="mail.debug">true</prop>
+	       <prop key="mail.smtp.ssl.trust">smtp.gmail.com</prop>
+		   <prop key="mail.smtp.ssl.protocols">TLSv1.2</prop>
+	    </props>
+     </property>
+</bean>
+	
+</beans>
+

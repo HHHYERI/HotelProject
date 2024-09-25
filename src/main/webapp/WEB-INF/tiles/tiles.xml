@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC "-//Apache Sofrware Foundation//DTD Tiles Configuration 3.0//EN" "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+
+<tiles-definitions>
+	<definition name="base-Template" template="/WEB-INF/tiles/layout/baseLayout.jsp">
+		<put-attribute name="title" value="Sample Title" />
+		<put-attribute name="menu" value="/WEB-INF/tiles/template/menu.jsp" />
+		<put-attribute name="content" value="" />
+		<put-attribute name="footer" value="/WEB-INF/tiles/template/footer.jsp" />
+	</definition>
+	
+	<definition name="welcome" extends="base-Template">
+		<put-attribute name="title" value="Hotel | Welcome" />
+		<put-attribute name="content" value="/WEB-INF/views/welcome.jsp" />
+	</definition>
+	
+	<definition name="home" extends="base-Template">
+		<put-attribute name="title" value="Hotel | Home" />
+		<put-attribute name="content" value="/WEB-INF/views/home.jsp" />
+	</definition>	
+	
+	<definition name="rooms" extends="base-Template">
+		<put-attribute name="title" value="Hotel | Rooms" />
+		<put-attribute name="content" value="/WEB-INF/views/rooms.jsp" />
+	</definition>
+	
+	<definition name="reserve" extends="base-Template">
+		<put-attribute name="title" value="Hotel | reserve" />
+		<put-attribute name="content" value="/WEB-INF/views/reserve.jsp" />
+	</definition>	
+	
+	<definition name="resv_cart" extends="base-Template">
+		<put-attribute name="title" value="Hotel | reserve cart" />
+		<put-attribute name="content" value="/WEB-INF/views/resv_cart.jsp" />
+	</definition>
+		
+	<definition name="resv_cfm" extends="base-Template">
+		<put-attribute name="title" value="Hotel | reserve confirm" />
+		<put-attribute name="content" value="/WEB-INF/views/resv_cfm.jsp" />
+	</definition>	
+	
+	<definition name="resv_gst_page" extends="base-Template">
+		<put-attribute name="title" value="Hotel | guest reserve confirm" />
+		<put-attribute name="content" value="/WEB-INF/views/resv_gst_page.jsp" />
+	</definition>		
+	
+		
+</tiles-definitions>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.springmvc.mapper.RoomsMapper">
+
+<!-- 룸 카테고리 조회 -->
+<select id="viewRoomsAll" resultType="hashMap">
+ SELECT 
+       a.room_gr
+      ,b.cd_nm
+      ,c.room_sz
+      ,c.room_cp
+      ,d.img_list
+      ,a.room_des      
+from   
+    (Select 
+       room_gr
+      ,room_des
+    from 
+       room_info
+    where rowid in(SELECT min(rowid) from room_info GROUP by room_gr)) a 
+    ,lan_code b
+    , ( select 
+            room_gr
+          , min(room_size) || ' - ' || max(room_size) room_sz
+          , min(room_cap) || ' - ' || max(room_cap) room_cp
+        from 
+            room_info
+        group by 
+            room_gr
+      ) c
+    , (
+        select 
+               a.room_gr
+             , listagg(b.img_path,'^') within group( order by decode(a.room_tp, 'SGL',1,'DBL',2,'TWN',3,'TRP',4,'FML',5,99) ) as img_list
+          from ( select distinct room_gr, room_tp from room_info ) a
+             , img b
+         where a.room_gr || '^' || a.room_tp = b.tb_keys(+)
+         group by a.room_gr    
+      ) d
+where a.room_gr = b.class_s_cd(+)
+  and a.room_gr = c.room_gr(+)
+  and a.room_gr = d.room_gr(+)
+  and b.country_cd(+) = 'EN'  
+order by decode(a.room_gr, 'STD',1,'DLX',2,'LUX',3,'SUT',4,99)
+</select>
+
+<select id="test" resultType="String">
+	select 'abc' from dual
+</select>
+
+<select id="getTime" resultType="String">
+	SELECT 
+    	TO_CHAR(SYSDATE, 'YYYYMMDD') AS TODAY
+	FROM DUAL 
+</select>	
+	
+</mapper>
