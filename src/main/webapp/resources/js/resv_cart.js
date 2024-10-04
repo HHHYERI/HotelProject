@@ -50,8 +50,6 @@ $(function(){
 		        	"rsv_prc"       : parseInt(rsv_prc,10) + (meal_check == 'Y' ? (adlt_num * 20000) + (20000 * (chld_num / 2)) : 0),
 			    });
 			}
-			console.log("form:"+form);
-			console.log(JSON.stringify(form, null, 1));
 	        
 	        $.ajax({
 	            type: "POST",
