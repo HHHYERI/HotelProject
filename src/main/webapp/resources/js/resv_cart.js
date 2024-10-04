@@ -3,8 +3,8 @@ $(document).ready(function(){
 	    if (!(event.keyCode >=37 && event.keyCode<=40)) {
 	        var inputVal = $(this).val();
 	        $(this).val(inputVal.replace(/[^a-zA-Z0-9\s!@#$%^&*()_+=[\]{};':"\\|,.<>?~`-]/g, ''));    
-		    }
-		});
+		}
+	});
 });
 
 $(function(){
